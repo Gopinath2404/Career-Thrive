@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Seeker Dashboard</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #636566;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background-color: #848989;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #1a73e8;
+        }
+        
+        .dashboard {
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .jobs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .job-card {
+            background-color: #fffefe;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .apply-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .apply-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="logo">Job Seeker</div>
+    </div>
+
+    <div class="dashboard">
+        <h2>Welcome To Your Job Dashboard</h2>
+        <p>Your dream job awaits – start exploring today!</p>
+        <div class="jobs" id="jobListings"></div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3Pozh1DiDghqzpx2yTAYoXkLNHuWMHps",
+            authDomain: "jobposter-11ecd.firebaseapp.com",
+            projectId: "jobposter-11ecd",
+            storageBucket: "jobposter-11ecd.appspot.com",
+            messagingSenderId: "1054867723446",
+            appId: "1:1054867723446:web:d1902de9aeb7b146fc4217",
+            measurementId: "G-LK3WR7EKYB"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const jobListings = document.getElementById('jobListings');
+
+        function displayJobs(jobsToDisplay) {
+            jobListings.innerHTML = '';
+            if (jobsToDisplay.length === 0) {
+                jobListings.innerHTML = '<p>No jobs found. Please check back later.</p>';
+                return;
+            }
+
+            jobsToDisplay.forEach(job => {
+                const jobCard = document.createElement('div');
+                jobCard.classList.add('job-card');
+                jobCard.innerHTML = `
+                    <h4>${job.jobTitle || 'No Title'}</h4>
+                    <p><strong>Company:</strong> ${job.companyName || 'Not specified'}</p>
+                    <p><strong>Location:</strong> ${job.location || 'Not specified'}</p>
+                    <p><strong>Type:</strong> ${job.jobType || 'Not specified'}</p>
+                    <p><strong>Salary:</strong> ${job.salary ? '$' + job.salary : 'Not disclosed'}</p>
+                    <a href="apply.html" target="_blank">
+                        <button class="apply-btn">Apply</button>
+                    </a>
+                `;
+                jobListings.appendChild(jobCard);
+            });
+        }
+
+        function fetchAndDisplayFirestoreJobs() {
+            db.collection("jobs").get().then((querySnapshot) => {
+                const jobs = [];
+                querySnapshot.forEach((doc) => {
+                    jobs.push(doc.data());
+                });
+                displayJobs(jobs);
+            }).catch((error) => {
+                console.error("Error fetching jobs: ", error);
+                jobListings.innerHTML = '<p>Error loading jobs. Please try again later.</p>';
+            });
+        }
+
+        fetchAndDisplayFirestoreJobs();
+    </script>
+</body>
+
+</html>
